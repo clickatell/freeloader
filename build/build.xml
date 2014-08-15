@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<project name="FreeLoader" default="build" basedir="..">
+	<!-- Set global properties for this build -->
+	<property name="_VERSION_" value="1.0"/>
+	<property name="_SRC_" location="src"/>
+	<property name="_ETC_" location="etc"/>
+	<property name="_SCRIPTS_" location="scripts"/>
+	<property name="_DIST_" location="dist"/>
+	<property name="_LIB_" location="lib"/>
+	<property name="_BUILD_" location="build"/>
+	<property name="_PACKAGE_" location="${_DIST_}/package"/>
+		
+	<!-- Define INITIALISATION target-->
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<echo message="Project '${ant.project.name}' built using ${ant.version}"/>
+		<echo message="${java.home}"/>
+		<!-- remove the distribution directory -->
+		<delete dir="${_DIST_}"/>
+	</target>
+	
+	<!-- Define COMPILE target -->
+	<target name="compile" depends="init">
+
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${_BUILD_}/bin"/>
+		
+		<!-- Compile the java code from ${_SRC_} into ${_BUILD_}/bin -->
+		<javac srcdir="${_SRC_}" destdir="${_BUILD_}/bin" debug="true" optimize="true">
+			<classpath >
+				<pathelement location="${_LIB_}"/>
+				<fileset dir="${_LIB_}">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+		
+		<!-- Create the distribution directory -->
+		<mkdir dir="${_DIST_}/lib"/>
+		
+		<jar destfile="${_DIST_}/lib/FreeLoader.jar" basedir="${_BUILD_}/bin" index="true" >
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Sealed" value="false"/>
+				<attribute name="Main-Class" value="FreeLoader"/>
+				<attribute name="Specification-Title" value="ExternalMac"/>
+				<attribute name="Specification-Version" value="${_VERSION_}"/>
+				<attribute name="Specification-Vendor" value="clickatell"/>
+				<attribute name="Implementation-Title" value="FreeLoader"/>
+				<attribute name="Implementation-Version" value="${_VERSION_}"/>
+				<attribute name="Implementation-Vendor" value="clickatell"/>
+			</manifest>
+		</jar>
+	</target>
+	
+
+	<!-- Define PACKAGE target -->
+	<target name="package-win" depends="build" description="package for distribution">
+		<mkdir dir="${_PACKAGE_}"/>
+		<!-- create tarball -->
+		<zip destfile="${_PACKAGE_}/FreeLoader-${_VERSION_}.zip" >
+			<zipfileset dir="${_LIB_}" prefix="lib"/>
+			<zipfileset dir="${_DIST_}/lib" includes="FreeLoader.jar" fullpath="lib/FreeLoader.jar"/>
+			<zipfileset dir="${_ETC_}" includes="freeloader.conf" fullpath="etc/freeloader.conf"/>
+			<zipfileset dir="${_SCRIPTS_}" includes="freeloader.bat" fullpath="bin/freeloader.bat"/>
+			<zipfileset dir="${_SCRIPTS_}" includes="mt_generator.bat" fullpath="bin/mt_generator.bat"/>
+			<zipfileset dir="${_SCRIPTS_}" includes="mt_callback_listener.bat" fullpath="bin/mt_callback_listener.bat"/>
+			<zipfileset dir="${_SCRIPTS_}" includes="mo_callback_listener.bat" fullpath="bin/mo_callback_listener.bat"/>
+		</zip>
+	</target>
+	
+	
+	<!-- Define CLEAN target -->
+	<target name="clean" description="clean up">
+		<delete dir="${_PACKAGE_}"/>
+		<delete dir="${_BUILD_}/bin"/>
+	</target>
+	
+	<!-- Define BUILD target -->
+	<target name="build" depends="clean,compile" description="build TM">
+		<echo message="Completed FreeLoader release ${_VERSION_}: date ${DSTAMP}: time ${TSTAMP}" level="info"/>
+	</target>
+</project>
